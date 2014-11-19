@@ -1,0 +1,20 @@
+<h3>Yo this be  {{ $storage.username }}</h3>
+
+<label>Username</label>
+<input type="text" ng-model="$storage.username" placeholder="Username...">
+<!-- <button ng-click="addUser(username)">Set Username</button> -->
+
+<hr/>
+
+<label>New Forum</label>
+<input type="text" ng-model="forumName" placeholder="Forum name...">
+<button ng-click="addForum(forumName)">Add Forum</button>
+
+<hr/>
+
+<ul>
+	<li ng-repeat="forum in forums">
+		<a ui-sref="forum({key: forum.$id})">{{ forum.name }}</a>
+		<a href="#/" ng-click="removeForum(forum)">delete</a>
+	</li>
+</ul>

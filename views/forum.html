@@ -1,0 +1,17 @@
+<h1>Forum name: {{forum.name}}</h1>
+
+<hr>
+
+
+<input type="text" ng-model="newComment">
+<button ng-click="addComment($storage.username, newComment)">Add Comment</button>
+
+<hr>
+
+<h3>Comments</h3>
+
+<ul>
+	<li ng-repeat="comment in comments">{{comment.username}} says: "{{comment.comment}}"
+	</li>
+
+</ul>

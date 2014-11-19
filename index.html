@@ -1,0 +1,109 @@
+<html ng-app="RTFMApp">
+<head>
+    <title>My RTFM Demo App</title>
+</head>
+<body>
+    <h1>My RTFM Demo</h1>
+    <div ui-view></div>
+
+<!-- Angular JS -->
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js'></script>
+
+<!-- FireBase -->
+<script src="https://cdn.firebase.com/js/client/1.0.21/firebase.js"></script>
+
+<!-- AngularFire -->
+<script src="https://cdn.firebase.com/libs/angularfire/0.8.2/angularfire.min.js"></script>
+
+<!-- Angular UI Router -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.11/angular-ui-router.min.js"></script>
+
+<!-- ngStorage -->
+<script src="/bower_components/ngstorage/ngStorage.js"></script>
+
+<script type="text/javascript">
+		angular.module('RTFMApp', ['firebase', 'ui.router', 'ngStorage'])
+			// .run()
+			.service('FirebaseService', function ($firebase) {
+				var firebaseEndpoint = "https://my-rtfm.firebaseio.com/";
+				return {
+					getForums: function () {
+						return $firebase(new Firebase(firebaseEndpoint + "/forums"));
+					},
+
+					getForum: function (key) {
+						return $firebase(new Firebase(firebaseEndpoint + "/forums/" + key));
+					},
+					getForumComments: function(key) {
+						return $firebase(new Firebase(firebaseEndpoint + "/forums/" + key + '/comment'));
+					}
+				};
+			})
+			.controller('LandingCtrl', function ($scope, forumsRef, $localStorage) {
+				$scope.forums = forumsRef.$asArray();
+
+				$scope.$storage = $localStorage;
+
+				$scope.addUser = function (username) {
+					console.log('username', username);
+				}
+				$scope.addForum = function (forumName) {
+					$scope.forums.$add({
+						name: forumName
+					});
+
+					console.log('forumName', forumName);
+				}
+				$scope.removeForum = function(forumName) {
+					$scope.forums.$remove(forumName)
+				}	
+			})
+
+			.controller('ForumCtrl', function ($scope, forumRef, commentsRef, $localStorage) {
+				$scope.forum = forumRef.$asObject();
+				
+				$scope.comments = commentsRef.$asArray();
+				
+				$scope.$storage = $localStorage;
+				$scope.addComment = function(username, comment) {
+					$scope.comments.$add({
+						username: username,
+						comment: comment
+					});
+				}
+			})
+
+			.config(function ($stateProvider, $urlRouterProvider) {
+				$urlRouterProvider.otherwise('/');
+
+				$stateProvider
+					.state('landing', {
+						url: '/',
+						templateUrl: '/views/landing.html',
+						controller: 'LandingCtrl',
+						resolve: {
+							forumsRef: function (FirebaseService){
+								return FirebaseService.getForums();
+							}
+						}
+					})
+					.state('forum', {
+						url: '/forum/:key',
+						controller: 'ForumCtrl',
+						templateUrl: '/views/forum.html',
+						resolve: {
+							forumRef: function (FirebaseService, $stateParams) {
+								return FirebaseService.getForum($stateParams.key);
+							},
+							commentsRef: function(FirebaseService, $stateParams) {
+								return FirebaseService.getForumComments($stateParams.key);
+							}
+						}
+					});
+			});
+	</script>
+
+</body>
+
+
+</html>
